@@ -1,0 +1,13 @@
+# Bidding zones / country codes to pull from ENTSO-E.
+# 4-6 is the sweet spot: enough for cross-country comparison, few enough that runs stay fast.
+countries:
+  - code: DE_LU
+    name: Germany-Luxembourg
+  - code: FR
+    name: France
+  - code: NL
+    name: Netherlands
+  - code: ES
+    name: Spain
+  - code: PL
+    name: Poland

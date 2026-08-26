@@ -1,0 +1,16 @@
+# secrets & local env
+.env
+.venv/
+
+# local data landing
+data/
+
+# python
+__pycache__/
+*.pyc
+
+# power bi cache
+*.pbix.tmp
+
+# os junk
+.DS_Store

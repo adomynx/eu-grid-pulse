@@ -1,0 +1,7 @@
+-- Step 5: MARTS layer. Star schema for analytics.
+--   dim_date       (date_key, date, year, month, day, hour, is_weekend)
+--   dim_country    (country_key, country_code, country_name, bidding_zone)
+--   dim_fuel       (fuel_key, fuel_type, is_renewable)
+--   fact_load      (grain: country x datetime_utc; measure load_mw)
+--   fact_generation(grain: country x datetime_utc x fuel; measure generation_mw)
+-- TODO: build dims + facts

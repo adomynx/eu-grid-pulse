@@ -1,0 +1,8 @@
+-- Step 4: STAGING layer. Clean + harmonise into one clean grain.
+--   * every timestamp -> single UTC column (kills timezone/DST mess)
+--   * units -> MW
+--   * map ENTSO-E zone codes -> clean country names
+--   * normalise fuel/production-type labels
+--   * deduplicate overlapping rows from incremental re-pulls (keep latest)
+--   * handle nulls explicitly (drop vs zero vs flag — decide and document)
+-- TODO: build stg_load, stg_generation

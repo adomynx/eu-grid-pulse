@@ -1,0 +1,5 @@
+-- Step 6: dq_results table + any SQL-based checks.
+-- CREATE TABLE dq_results (
+--   check_name TEXT, layer TEXT, status TEXT,
+--   observed_value NUMERIC, threshold NUMERIC, run_ts TIMESTAMP
+-- );

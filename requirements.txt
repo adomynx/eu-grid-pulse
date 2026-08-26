@@ -1,0 +1,8 @@
+entsoe-py
+pandas
+sqlalchemy
+psycopg2-binary
+google-cloud-bigquery
+pandas-gbq
+pyyaml
+python-dotenv

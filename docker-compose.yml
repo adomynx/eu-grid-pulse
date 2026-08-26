@@ -1,0 +1,25 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: eu_grid_pulse_pg
+    environment:
+      POSTGRES_USER: grid
+      POSTGRES_PASSWORD: grid
+      POSTGRES_DB: eu_grid_pulse
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  # Optional: uncomment to run Jenkins locally for Step 7 orchestration.
+  # jenkins:
+  #   image: jenkins/jenkins:lts
+  #   container_name: eu_grid_pulse_jenkins
+  #   ports:
+  #     - "8080:8080"
+  #   volumes:
+  #     - jenkins_home:/var/jenkins_home
+
+volumes:
+  pgdata:
+  # jenkins_home:

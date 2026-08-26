@@ -1,0 +1,3 @@
+-- Step 3: RAW layer DDL. Land data as-is (unprocessed load + generation).
+-- TODO: CREATE TABLE raw_load (...);
+-- TODO: CREATE TABLE raw_generation (...);
