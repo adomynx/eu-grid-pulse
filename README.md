@@ -20,6 +20,10 @@ and serves it through **Power BI** and an interactive dashboard.
 
 </div>
 
+<p align="center">
+  <img src="docs/architecture.svg" alt="EU Grid Pulse architecture: ENTSO-E API to a DuckDB star schema transformed with dbt, data-quality tested, orchestrated with Dagster, and served through Power BI and an HTML dashboard" width="920">
+</p>
+
 ---
 
 ## Why this project
@@ -35,21 +39,6 @@ dashboard anyone can read — and it does it the way a modern data team would: v
 controlled transformations, tested at every layer, orchestrated and observable.
 
 ## Architecture
-
-```mermaid
-flowchart LR
-    API["ENTSO-E API<br/>(or synthetic generator)"] --> RAW["DuckDB · RAW<br/>raw_load · raw_generation"]
-    RAW --> STG["dbt · STAGING<br/>UTC harmonise · de-dup · null handling"]
-    STG --> MART["dbt · MARTS<br/>star schema"]
-    MART --> DQ["31 dbt tests<br/>data-quality gate"]
-    MART --> PBI["Power BI<br/>PBIP + 21 DAX measures"]
-    MART --> HTML["Interactive HTML dashboard"]
-
-    DAG["🟣 Dagster — asset graph + daily schedule orchestrates every step"] -.-> RAW
-    DAG -.-> STG
-    DAG -.-> MART
-    DAG -.-> HTML
-```
 
 The pipeline follows the **medallion pattern** (raw → staging → marts). The raw copy
 stays honest and replayable; all the messy fixes live in one well-documented staging
