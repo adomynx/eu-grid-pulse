@@ -1,0 +1,11 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: main
+    description: "Raw ENTSO-E extracts landed AS-IS by the Python ingestion layer."
+    tables:
+      - name: raw_load
+        description: "Actual electricity demand, one row per country x timestamp per pull."
+      - name: raw_generation
+        description: "Actual generation broken out by production type, per pull."

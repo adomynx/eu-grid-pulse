@@ -1,0 +1,15 @@
+name: "eu_grid_pulse"
+version: "1.0.0"
+config-version: 2
+
+profile: "eu_grid_pulse"
+
+model-paths: ["models"]
+test-paths: ["tests"]
+
+models:
+  eu_grid_pulse:
+    staging:
+      +materialized: view
+    marts:
+      +materialized: table

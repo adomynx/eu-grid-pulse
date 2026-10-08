@@ -1,0 +1,37 @@
+table dim_country
+	lineageTag: c3cd7b45-8640-4b8c-9697-59ec37599d99
+
+	column country_key
+		dataType: string
+		lineageTag: cdd90fb7-2955-4775-b166-8328bcfa31bc
+		summarizeBy: none
+		sourceColumn: country_key
+
+	column country_code
+		dataType: string
+		lineageTag: d45f7cfb-bf2d-45e9-9236-d6bd236bd30a
+		summarizeBy: none
+		sourceColumn: country_code
+
+	column country_name
+		dataType: string
+		lineageTag: 8ea9c082-cf43-4c18-988f-973d902aed3e
+		summarizeBy: none
+		sourceColumn: country_name
+
+	column bidding_zone
+		dataType: string
+		lineageTag: a20cb4a1-a2a6-4d57-b608-aaf53d6964c2
+		summarizeBy: none
+		sourceColumn: bidding_zone
+
+	partition dim_country = m
+		mode: import
+		source =
+				let
+					Source = Csv.Document(File.Contents(DataFolder & "dim_country.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+					Headers = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+					Typed = Table.TransformColumnTypes(Headers, {{"country_key", type text}, {"country_code", type text}, {"country_name", type text}, {"bidding_zone", type text}})
+				in
+					Typed
+

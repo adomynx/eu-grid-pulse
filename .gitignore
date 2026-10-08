@@ -9,8 +9,24 @@ data/
 __pycache__/
 *.pyc
 
-# power bi cache
+# duckdb warehouse
+*.duckdb
+
+# dbt artifacts
+dbt/target/
+dbt/logs/
+
+# dagster local instance
+.dagster_home/
+
+# power bi cache / local project files
 *.pbix.tmp
+**/.pbi/
+**/cache.abf
+**/*.pbix.tmp
 
 # os junk
 .DS_Store
+
+# dbt local user id
+dbt/.user.yml

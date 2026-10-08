@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "EUGridPulse"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "fa757f0b-9d9f-4f36-a5f8-36b089bd2c9b"
+  }
+}

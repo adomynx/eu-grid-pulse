@@ -1,0 +1,127 @@
+table fact_load
+	lineageTag: f96dc067-e15a-467f-ab02-0a4078e346fa
+
+	measure 'Total Load (MWh)' = SUM(fact_load[load_mw])
+		formatString: #,0
+		lineageTag: 62441f26-70e0-4f11-954b-489b783a72de
+
+	measure 'Total Load (GWh)' = DIVIDE([Total Load (MWh)], 1000)
+		formatString: #,0.0
+		lineageTag: 3aed2c93-549c-477c-a89a-dde44b7b398f
+
+	measure 'Avg Load (MW)' = AVERAGE(fact_load[load_mw])
+		formatString: #,0
+		lineageTag: d719481f-7dd5-4875-a912-d92d394da30e
+
+	measure 'Peak Load (MW)' = MAX(fact_load[load_mw])
+		formatString: #,0
+		lineageTag: f1261995-c666-422e-843d-77c3c2fa0d34
+
+	measure 'Min Load (MW)' = MIN(fact_load[load_mw])
+		formatString: #,0
+		lineageTag: 4460c101-b632-48c4-9433-17541418be93
+
+	measure 'Load Factor %' = DIVIDE([Avg Load (MW)], [Peak Load (MW)])
+		formatString: 0.0%
+		lineageTag: 7ce11b79-5ee4-4f74-91e3-ff6297d2ecc3
+
+	measure 'Total Generation (GWh)' = DIVIDE(SUM(fact_generation[generation_mw]), 1000)
+		formatString: #,0.0
+		lineageTag: 178b537b-b736-4625-965f-910b70dd63ea
+
+	measure 'Renewable Generation (GWh)' = DIVIDE(CALCULATE(SUM(fact_generation[generation_mw]), dim_fuel[is_renewable] = TRUE()), 1000)
+		formatString: #,0.0
+		lineageTag: 7bf5012e-625f-463f-8a15-86f92ad2e69e
+
+	measure 'Nuclear Generation (GWh)' = DIVIDE(CALCULATE(SUM(fact_generation[generation_mw]), dim_fuel[fuel_type] = "Nuclear"), 1000)
+		formatString: #,0.0
+		lineageTag: d0d5cd3e-fed2-482a-a789-c2e58c91e597
+
+	measure 'Non-Renewable Generation (GWh)' = [Total Generation (GWh)] - [Renewable Generation (GWh)]
+		formatString: #,0.0
+		lineageTag: f45987f6-56e2-4326-bcfe-1c6a180a409c
+
+	measure 'Renewable Share %' = DIVIDE([Renewable Generation (GWh)], [Total Generation (GWh)])
+		formatString: 0.0%
+		lineageTag: e5d097cb-aab8-4090-a281-88d2f1a19a53
+
+	measure 'Low-Carbon Share %' = DIVIDE(CALCULATE(SUM(fact_generation[generation_mw]), FILTER(dim_fuel, dim_fuel[is_renewable] = TRUE() || dim_fuel[fuel_type] = "Nuclear")), SUM(fact_generation[generation_mw]))
+		formatString: 0.0%
+		lineageTag: 870b5e3f-b9fb-4ba0-90c8-5b1b53f14f25
+
+	measure 'Fuel Share of Mix %' = DIVIDE(SUM(fact_generation[generation_mw]), CALCULATE(SUM(fact_generation[generation_mw]), ALL(dim_fuel)))
+		formatString: 0.0%
+		lineageTag: 0f9690a1-198b-4d6e-9993-a0350da76f5b
+
+	measure 'Country Share of Generation %' = DIVIDE(SUM(fact_generation[generation_mw]), CALCULATE(SUM(fact_generation[generation_mw]), ALL(dim_country)))
+		formatString: 0.0%
+		lineageTag: 83d44a49-0c11-4640-b987-2d8cce0e78b1
+
+	measure 'Demand vs Generation Gap (GWh)' = [Total Generation (GWh)] - [Total Load (GWh)]
+		formatString: #,0.0
+		lineageTag: a8ed7c52-6270-4541-809b-ff576d709d27
+
+	measure 'Self-Sufficiency %' = DIVIDE([Total Generation (GWh)], [Total Load (GWh)])
+		formatString: 0.0%
+		lineageTag: 03997fc5-0e92-47dd-ac18-ee55bb30d495
+
+	measure 'Country Rank by Renewable' = IF(HASONEVALUE(dim_country[country_name]), RANKX(ALL(dim_country[country_name]), [Renewable Share %], , DESC))
+		formatString: 0
+		lineageTag: 266732c1-4c35-4bbb-898c-06c7cad68fb9
+
+	measure 'Top Fuel' = MAXX(TOPN(1, SUMMARIZE(fact_generation, dim_fuel[fuel_type], "@gen", SUM(fact_generation[generation_mw])), [@gen], DESC), dim_fuel[fuel_type])
+		lineageTag: bfa7ec06-4f3e-409e-b5a2-03c929ac00ec
+
+	measure '7D Avg Load (MW)' = VAR cur = MAX(dim_date[date]) RETURN CALCULATE(AVERAGE(fact_load[load_mw]), FILTER(ALL(dim_date), dim_date[date] > cur - 7 && dim_date[date] <= cur))
+		formatString: #,0
+		lineageTag: 80560dc0-c71c-4630-8bb2-0f9113707a5d
+
+	measure 'Peak Hour (UTC)' = VAR byHour = SUMMARIZE(fact_load, dim_date[hour], "@avg", AVERAGE(fact_load[load_mw])) VAR top = TOPN(1, byHour, [@avg], DESC) RETURN MAXX(top, dim_date[hour])
+		formatString: 0
+		lineageTag: 95f9259c-237c-4a7b-be95-242b6f77a926
+
+	measure 'Weekend Load Ratio %' = DIVIDE(CALCULATE([Avg Load (MW)], dim_date[is_weekend] = TRUE()), CALCULATE([Avg Load (MW)], dim_date[is_weekend] = FALSE()))
+		formatString: 0.0%
+		lineageTag: 53c89e31-6eff-42cf-a5ca-07267db67898
+
+	column country_key
+		dataType: string
+		lineageTag: cb6c1c8a-ecca-41c6-9dd2-efbcf97f2dcb
+		summarizeBy: none
+		sourceColumn: country_key
+
+	column date_key
+		dataType: string
+		lineageTag: 4b8f11eb-2e8e-4ce4-8f04-2ca1113fc01b
+		summarizeBy: none
+		sourceColumn: date_key
+
+	column datetime_utc
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 976eeb77-025f-4174-ad82-d26850230112
+		summarizeBy: none
+		sourceColumn: datetime_utc
+
+	column country_code
+		dataType: string
+		lineageTag: 0f5a8d64-a9ad-4bf8-bad3-ed3c88b53b42
+		summarizeBy: none
+		sourceColumn: country_code
+
+	column load_mw
+		dataType: double
+		lineageTag: 08f2abe6-9136-43e7-bc3f-acfc1dec6142
+		summarizeBy: none
+		sourceColumn: load_mw
+
+	partition fact_load = m
+		mode: import
+		source =
+				let
+					Source = Csv.Document(File.Contents(DataFolder & "fact_load.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+					Headers = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+					Typed = Table.TransformColumnTypes(Headers, {{"country_key", type text}, {"date_key", type text}, {"datetime_utc", type datetime}, {"country_code", type text}, {"load_mw", type number}})
+				in
+					Typed
+

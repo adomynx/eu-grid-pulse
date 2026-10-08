@@ -1,0 +1,8 @@
+/// Folder that holds the exported mart CSVs. Point this at your local
+/// powerbi/data folder (absolute path, trailing backslash). Regenerate the
+/// CSVs with `python -m src.export_powerbi`.
+expression DataFolder = "F:\Project\eu-grid-pulse\powerbi\data\" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	lineageTag: bb696550-f1af-44fb-a6c4-d7d70cc8ccba
+
+	annotation PBI_ResultType = Text
+

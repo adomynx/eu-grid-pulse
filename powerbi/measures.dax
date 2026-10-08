@@ -1,0 +1,156 @@
+// =============================================================================
+// EU Grid Pulse — DAX measure library
+// -----------------------------------------------------------------------------
+// Paste these into a dedicated "_Measures" table in Power BI (see POWERBI.md).
+// Conventions:
+//   * one grain row in fact_* = one hour, so SUM(load_mw) is effectively MWh.
+//   * every ratio uses DIVIDE() (safe division, no div-by-zero errors).
+//   * VAR is used to compute once and keep each measure readable.
+// =============================================================================
+
+
+// ---- LOAD / DEMAND ----------------------------------------------------------
+
+Total Load (MWh) = SUM ( fact_load[load_mw] )
+
+Total Load (GWh) = DIVIDE ( [Total Load (MWh)], 1000 )
+
+Avg Load (MW) = AVERAGE ( fact_load[load_mw] )
+
+Peak Load (MW) = MAX ( fact_load[load_mw] )
+
+Min Load (MW) = MIN ( fact_load[load_mw] )
+
+// Load factor: how "flat" demand is (avg vs peak). Classic grid KPI.
+Load Factor % =
+DIVIDE ( [Avg Load (MW)], [Peak Load (MW)] )
+
+
+// ---- GENERATION -------------------------------------------------------------
+
+Total Generation (GWh) = DIVIDE ( SUM ( fact_generation[generation_mw] ), 1000 )
+
+Renewable Generation (GWh) =
+DIVIDE (
+    CALCULATE (
+        SUM ( fact_generation[generation_mw] ),
+        dim_fuel[is_renewable] = TRUE ()
+    ),
+    1000
+)
+
+Nuclear Generation (GWh) =
+DIVIDE (
+    CALCULATE (
+        SUM ( fact_generation[generation_mw] ),
+        dim_fuel[fuel_type] = "Nuclear"
+    ),
+    1000
+)
+
+Non-Renewable Generation (GWh) =
+[Total Generation (GWh)] - [Renewable Generation (GWh)]
+
+
+// ---- SHARES (the headline story) --------------------------------------------
+
+Renewable Share % =
+DIVIDE ( [Renewable Generation (GWh)], [Total Generation (GWh)] )
+
+// Low-carbon = renewables + nuclear. A deliberately different number from
+// renewable share (nuclear is low-carbon but not renewable).
+Low-Carbon Share % =
+VAR lowcarbon =
+    CALCULATE (
+        SUM ( fact_generation[generation_mw] ),
+        FILTER (
+            dim_fuel,
+            dim_fuel[is_renewable] = TRUE () || dim_fuel[fuel_type] = "Nuclear"
+        )
+    )
+RETURN
+    DIVIDE ( lowcarbon, SUM ( fact_generation[generation_mw] ) )
+
+// Each fuel's share of the generation currently in filter context.
+Fuel Share of Mix % =
+DIVIDE (
+    SUM ( fact_generation[generation_mw] ),
+    CALCULATE ( SUM ( fact_generation[generation_mw] ), ALL ( dim_fuel ) )
+)
+
+// Each country's share of total generation across all countries.
+Country Share of Generation % =
+DIVIDE (
+    SUM ( fact_generation[generation_mw] ),
+    CALCULATE ( SUM ( fact_generation[generation_mw] ), ALL ( dim_country ) )
+)
+
+
+// ---- GRID BALANCE -----------------------------------------------------------
+
+Demand vs Generation Gap (GWh) =
+[Total Generation (GWh)] - [Total Load (GWh)]
+
+// >100% = net exporter over the period, <100% = net importer.
+Self-Sufficiency % =
+DIVIDE ( [Total Generation (GWh)], [Total Load (GWh)] )
+
+
+// ---- RANKING & ADVANCED PATTERNS -------------------------------------------
+
+// Rank countries by renewable share (1 = greenest). ALL() removes the row's
+// own country filter so every country is ranked against the full set.
+Country Rank by Renewable =
+IF (
+    HASONEVALUE ( dim_country[country_name] ),
+    RANKX ( ALL ( dim_country[country_name] ), [Renewable Share %],, DESC )
+)
+
+// Highest-output fuel in the current context (TOPN pattern).
+Top Fuel =
+VAR t =
+    TOPN (
+        1,
+        SUMMARIZE (
+            fact_generation,
+            dim_fuel[fuel_type],
+            "@gen", SUM ( fact_generation[generation_mw] )
+        ),
+        [@gen], DESC
+    )
+RETURN
+    MAXX ( t, dim_fuel[fuel_type] )
+
+// 7-day rolling average demand. Works without a marked date table by filtering
+// dim_date[date] to the trailing 7-day window ending at the row's latest date.
+7D Avg Load (MW) =
+VAR cur = MAX ( dim_date[date] )
+RETURN
+    CALCULATE (
+        AVERAGE ( fact_load[load_mw] ),
+        FILTER (
+            ALL ( dim_date ),
+            dim_date[date] > cur - 7 && dim_date[date] <= cur
+        )
+    )
+
+// Hour of day (UTC) with the highest average demand — "when does demand peak?".
+Peak Hour (UTC) =
+VAR byHour =
+    SUMMARIZE (
+        fact_load,
+        dim_date[hour],
+        "@avg", AVERAGE ( fact_load[load_mw] )
+    )
+VAR top = TOPN ( 1, byHour, [@avg], DESC )
+RETURN
+    MAXX ( top, dim_date[hour] )
+
+// Weekend vs weekday demand ratio (behavioural signal).
+Weekend Load Ratio % =
+VAR wknd =
+    CALCULATE ( [Avg Load (MW)], dim_date[is_weekend] = TRUE () )
+VAR wday =
+    CALCULATE ( [Avg Load (MW)], dim_date[is_weekend] = FALSE () )
+RETURN
+    DIVIDE ( wknd, wday )

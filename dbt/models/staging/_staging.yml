@@ -1,0 +1,25 @@
+version: 2
+
+models:
+  - name: stg_load
+    description: "Harmonised load: UTC timestamps, de-duplicated, nulls dropped."
+    columns:
+      - name: country_code
+        tests: [not_null]
+      - name: datetime_utc
+        tests: [not_null]
+      - name: load_mw
+        tests:
+          - not_null
+
+  - name: stg_generation
+    description: "Harmonised generation-by-fuel: UTC timestamps, de-duplicated, nulls dropped."
+    columns:
+      - name: country_code
+        tests: [not_null]
+      - name: datetime_utc
+        tests: [not_null]
+      - name: production_type
+        tests: [not_null]
+      - name: generation_mw
+        tests: [not_null]

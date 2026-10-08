@@ -1,0 +1,20 @@
+relationship fact_load_to_dim_date
+	fromColumn: fact_load.date_key
+	toColumn: dim_date.date_key
+
+relationship fact_load_to_dim_country
+	fromColumn: fact_load.country_key
+	toColumn: dim_country.country_key
+
+relationship fact_generation_to_dim_date
+	fromColumn: fact_generation.date_key
+	toColumn: dim_date.date_key
+
+relationship fact_generation_to_dim_country
+	fromColumn: fact_generation.country_key
+	toColumn: dim_country.country_key
+
+relationship fact_generation_to_dim_fuel
+	fromColumn: fact_generation.fuel_key
+	toColumn: dim_fuel.fuel_key
+

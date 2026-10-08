@@ -1,0 +1,62 @@
+version: 2
+
+models:
+  - name: dim_country
+    description: "One row per bidding zone."
+    columns:
+      - name: country_key
+        tests: [not_null, unique]
+      - name: country_name
+        tests: [not_null]
+
+  - name: dim_fuel
+    description: "One row per production type, with the renewable flag."
+    columns:
+      - name: fuel_key
+        tests: [not_null, unique]
+      - name: is_renewable
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [true, false]
+
+  - name: dim_date
+    description: "Hourly date/time dimension."
+    columns:
+      - name: date_key
+        tests: [not_null, unique]
+      - name: is_weekend
+        tests: [not_null]
+
+  - name: fact_load
+    description: "Actual load at country x hour grain."
+    columns:
+      - name: country_key
+        tests:
+          - not_null
+          - relationships: {to: ref('dim_country'), field: country_key}
+      - name: date_key
+        tests:
+          - not_null
+          - relationships: {to: ref('dim_date'), field: date_key}
+      - name: load_mw
+        tests: [not_null]
+
+  - name: fact_generation
+    description: "Actual generation at country x hour x fuel grain."
+    columns:
+      - name: country_key
+        tests:
+          - not_null
+          - relationships: {to: ref('dim_country'), field: country_key}
+      - name: date_key
+        tests:
+          - not_null
+          - relationships: {to: ref('dim_date'), field: date_key}
+      - name: fuel_key
+        tests:
+          - not_null
+          - relationships: {to: ref('dim_fuel'), field: fuel_key}
+      - name: generation_mw
+        tests: [not_null]

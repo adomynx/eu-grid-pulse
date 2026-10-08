@@ -1,0 +1,31 @@
+table dim_fuel
+	lineageTag: a87dab06-b95f-458f-ab4f-843b3cc69bc5
+
+	column fuel_key
+		dataType: string
+		lineageTag: d329524b-df70-478d-b657-74f7f235936c
+		summarizeBy: none
+		sourceColumn: fuel_key
+
+	column fuel_type
+		dataType: string
+		lineageTag: d502686d-d9ec-4d04-be18-d881dec14388
+		summarizeBy: none
+		sourceColumn: fuel_type
+
+	column is_renewable
+		dataType: boolean
+		lineageTag: ad810489-f233-48f1-86c7-af94c1f40153
+		summarizeBy: none
+		sourceColumn: is_renewable
+
+	partition dim_fuel = m
+		mode: import
+		source =
+				let
+					Source = Csv.Document(File.Contents(DataFolder & "dim_fuel.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+					Headers = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+					Typed = Table.TransformColumnTypes(Headers, {{"fuel_key", type text}, {"fuel_type", type text}, {"is_renewable", type logical}})
+				in
+					Typed
+

@@ -1,0 +1,56 @@
+table fact_generation
+	lineageTag: aab9e0d9-cd2c-4c4f-ad87-1f1e5c7d908e
+
+	column country_key
+		dataType: string
+		lineageTag: 131231e2-b815-4d0a-8978-7d2c65bd2e83
+		summarizeBy: none
+		sourceColumn: country_key
+
+	column date_key
+		dataType: string
+		lineageTag: 168bc621-f14c-4335-90b8-db7da25756fc
+		summarizeBy: none
+		sourceColumn: date_key
+
+	column fuel_key
+		dataType: string
+		lineageTag: c905115c-fd2c-4c58-8d58-63c14f2408ab
+		summarizeBy: none
+		sourceColumn: fuel_key
+
+	column datetime_utc
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 098ef4ac-ae8d-4e3a-88f2-8b95e22d3fb5
+		summarizeBy: none
+		sourceColumn: datetime_utc
+
+	column country_code
+		dataType: string
+		lineageTag: a8a74853-b77c-4956-8f2e-321ea2f14020
+		summarizeBy: none
+		sourceColumn: country_code
+
+	column production_type
+		dataType: string
+		lineageTag: 02ac9054-8777-45e3-ab2a-04cb885d0d9c
+		summarizeBy: none
+		sourceColumn: production_type
+
+	column generation_mw
+		dataType: double
+		lineageTag: 343b6365-eaca-4913-9473-6e286f2ebeb0
+		summarizeBy: none
+		sourceColumn: generation_mw
+
+	partition fact_generation = m
+		mode: import
+		source =
+				let
+					Source = Csv.Document(File.Contents(DataFolder & "fact_generation.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+					Headers = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+					Typed = Table.TransformColumnTypes(Headers, {{"country_key", type text}, {"date_key", type text}, {"fuel_key", type text}, {"datetime_utc", type datetime}, {"country_code", type text}, {"production_type", type text}, {"generation_mw", type number}})
+				in
+					Typed
+

@@ -1,0 +1,10 @@
+eu_grid_pulse:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      # Same warehouse file the Python layer writes to. The runner sets DUCKDB_PATH;
+      # the default keeps manual `dbt run` working from the dbt/ directory.
+      path: "{{ env_var('DUCKDB_PATH', '../data/eu_grid_pulse.duckdb') }}"
+      schema: main
+      threads: 4

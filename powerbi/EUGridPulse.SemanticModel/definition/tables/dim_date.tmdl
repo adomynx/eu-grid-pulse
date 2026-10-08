@@ -1,0 +1,63 @@
+table dim_date
+	lineageTag: 3febe612-3e4b-4c64-820a-0596480cf9a0
+
+	column date_key
+		dataType: string
+		lineageTag: f94ba873-392d-4940-82fc-2340c89befb5
+		summarizeBy: none
+		sourceColumn: date_key
+
+	column datetime_utc
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: cfdba87e-ec0f-4cb0-9e9b-cb2de9ac5e59
+		summarizeBy: none
+		sourceColumn: datetime_utc
+
+	column date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 8882b70c-6155-433f-985b-0f88b1e04bee
+		summarizeBy: none
+		sourceColumn: date
+
+	column year
+		dataType: int64
+		lineageTag: 5cb20998-d787-444a-8034-c922ebcc1cac
+		summarizeBy: none
+		sourceColumn: year
+
+	column month
+		dataType: int64
+		lineageTag: 81c46006-5f01-406e-9a7f-14ca3914aa65
+		summarizeBy: none
+		sourceColumn: month
+
+	column day
+		dataType: int64
+		lineageTag: 999825c5-33a4-4edb-a736-ec364730fde7
+		summarizeBy: none
+		sourceColumn: day
+
+	column hour
+		dataType: int64
+		lineageTag: 7bfdfe93-2f96-4c47-9fa8-b2560d0fd473
+		summarizeBy: none
+		sourceColumn: hour
+
+	column is_weekend
+		dataType: boolean
+		lineageTag: f70e7e57-7abe-4d09-9166-f06b4a519dd0
+		summarizeBy: none
+		sourceColumn: is_weekend
+
+	partition dim_date = m
+		mode: import
+		source =
+				let
+					Source = Csv.Document(File.Contents(DataFolder & "dim_date.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+					Headers = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+					Typed = Table.TransformColumnTypes(Headers, {{"date_key", type text}, {"datetime_utc", type datetime}, {"date", type datetime}, {"year", Int64.Type}, {"month", Int64.Type}, {"day", Int64.Type}, {"hour", Int64.Type}, {"is_weekend", type logical}})
+				in
+					Typed
+
