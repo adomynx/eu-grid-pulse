@@ -87,7 +87,7 @@ erDiagram
 
 **Python 3.10** (pandas + NumPy, entsoe-py) · **DuckDB** (warehouse) ·
 **dbt** (transformations + tests) · **Dagster** (orchestration) ·
-**Power BI** (PBIP "as code" + DAX) · **Docker** · **Git**
+**Power BI** (PBIP "as code" + DAX) · **Git**
 
 > **Why these choices:** the ENTSO-E source is *batch* and the volume is small, so the
 > stack is deliberately a clean batch stack — no Spark/Kafka shoehorned in where they

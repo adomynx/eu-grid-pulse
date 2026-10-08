@@ -1,8 +1,17 @@
-entsoe-py
-pandas
-sqlalchemy
-psycopg2-binary
-google-cloud-bigquery
-pandas-gbq
-pyyaml
-python-dotenv
+# Core
+duckdb==1.5.6
+pandas==2.3.3
+python-dotenv==1.2.4
+PyYAML==6.0.3
+
+# Ingestion — ENTSO-E API
+entsoe-py==0.8.1
+
+# Transformations — dbt on DuckDB
+dbt-core==1.12.5
+dbt-duckdb==1.11.0
+
+# Orchestration — Dagster (+ dbt integration and UI)
+dagster==1.13.25
+dagster-dbt==0.29.25
+dagster-webserver==1.13.25

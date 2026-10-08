@@ -61,7 +61,9 @@ eu-grid-pulse/
 │   │   └── synthetic.py           # realistic fake grid data (no token needed)
 │   ├── load/load_raw.py           # DataFrames → raw_load / raw_generation (+ watermark)
 │   ├── dashboard.py               # marts → dashboards/index.html
-│   ├── run_pipeline.py            # THE orchestrator (ingest→dbt run→dbt test→dashboard)
+│   ├── export_powerbi.py          # marts → Parquet/CSV for Power BI
+│   ├── run_pipeline.py            # no-UI orchestrator (ingest→dbt build→dashboard→export)
+│   ├── dagster_defs.py            # Dagster asset graph + daily schedule (primary orchestrator)
 │   └── pipeline.py                # thin wrapper so `python -m src.pipeline` still works
 ├── dbt/
 │   ├── dbt_project.yml            # dbt config (staging=views, marts=tables)
@@ -71,8 +73,8 @@ eu-grid-pulse/
 │   │   ├── staging/               # stg_load, stg_generation (+ _staging.yml tests)
 │   │   └── marts/                 # dim_* , fact_* (+ _marts.yml tests)
 │   └── tests/                     # custom plausibility checks
-├── dashboards/index.html          # the generated dashboard
-└── sql/01_raw.sql                 # original raw DDL (load_raw.py now owns table creation)
+├── powerbi/                       # PBIP (TMDL model + 21 DAX measures) + measures.dax
+└── dashboards/index.html          # the generated dashboard
 ```
 
 ---

@@ -1,13 +1,16 @@
-.PHONY: up down run test-token
+.PHONY: install run dagster export test-token
 
-up:
-	docker compose up -d
+install:        ## install dependencies into the active environment
+	pip install -r requirements.txt
 
-down:
-	docker compose down
+run:            ## run the whole pipeline (ingest -> dbt build -> dashboard -> export)
+	python -m src.run_pipeline
 
-run:
-	python -m src.pipeline
+dagster:        ## launch the Dagster UI (http://localhost:3000)
+	dagster dev -m src.dagster_defs
 
-test-token:
+export:         ## refresh the Power BI data exports from the marts
+	python -m src.export_powerbi
+
+test-token:     ## confirm the ENTSO-E token (or synthetic fallback) works
 	python -m src.ingest.extract_entsoe --smoke-test
