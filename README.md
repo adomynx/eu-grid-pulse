@@ -167,12 +167,14 @@ eu-grid-pulse/
 | Orchestration — Dagster asset graph + schedule | ✅ Done |
 | Power BI — PBIP model + 21 DAX measures | ✅ Done |
 | HTML dashboard | ✅ Done |
-| Live ENTSO-E data (pending free API token) | 🚧 Token requested |
+| Live ENTSO-E data | ✅ Verified on 30 days of live data (5 zones, 21 fuel types) |
 
-> **Note on data:** the pipeline ships with a realistic synthetic generator so it runs
-> end-to-end with no credentials. The country fuel-mix profiles are characteristic of
-> the real grids (France nuclear-heavy, Poland coal-heavy, Spain solar/wind). Swapping
-> in a live ENTSO-E token changes nothing downstream.
+> **Note on data:** with an `ENTSOE_TOKEN` set, the pipeline pulls **live** ENTSO-E
+> data (validated end-to-end: ~230k raw rows, 31/31 tests green, real renewable-share
+> by country — DE ≈ 60%, ES ≈ 53%, PL ≈ 33%, FR ≈ 21% nuclear-heavy, NL ≈ 20%). With
+> **no token**, it falls back to a realistic synthetic generator so anyone can clone
+> and run it with zero credentials — nothing downstream changes between the two.
+> Ingestion tolerates ENTSO-E's not-yet-published recent windows (per-series skip).
 
 ## Design notes (the hard parts)
 

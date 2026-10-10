@@ -39,6 +39,18 @@ def _window(con, country: str, now: pd.Timestamp) -> tuple[pd.Timestamp, pd.Time
     return start, now.tz_convert("Europe/Berlin")
 
 
+def _pull(con, code: str, kind: str, fetch, load) -> int:
+    """Fetch one series and land it, tolerating ENTSO-E's 'no data yet' for the
+    most recent (not-yet-published) window — a per-series skip, not a run failure."""
+    try:
+        df = fetch()
+    except Exception as exc:  # noqa: BLE001 — entsoe-py raises on empty/late windows
+        reason = type(exc).__name__ + (f": {exc}" if str(exc) else "")
+        print(f"[ingest] {code} {kind}: skipped ({reason})", file=sys.stderr)
+        return 0
+    return load(df, con=con)
+
+
 def ingest() -> int:
     """Pull + land raw for every configured country. Returns total rows written."""
     mode = "SYNTHETIC" if extract.use_synthetic() else "REAL (ENTSO-E)"
@@ -54,10 +66,10 @@ def ingest() -> int:
             if start >= end:
                 print(f"[ingest] {code}: up to date, nothing to pull.")
                 continue
-            dl = extract.fetch_load(code, start, end)
-            dg = extract.fetch_generation(code, start, end)
-            n1 = load_raw.load_raw_load(dl, con=con)
-            n2 = load_raw.load_raw_generation(dg, con=con)
+            n1 = _pull(con, code, "load",
+                       lambda: extract.fetch_load(code, start, end), load_raw.load_raw_load)
+            n2 = _pull(con, code, "generation",
+                       lambda: extract.fetch_generation(code, start, end), load_raw.load_raw_generation)
             total += n1 + n2
             print(f"[ingest] {code}: +{n1} load rows, +{n2} generation rows "
                   f"({start.date()} -> {end.date()})")
@@ -104,7 +116,7 @@ def main() -> int:
     except Exception as exc:  # noqa: BLE001
         print(f"[WARN] Power BI export failed: {exc}", file=sys.stderr)
 
-    print("\n✅ pipeline complete.")
+    print("\nPipeline complete.")
     return 0
 
 
